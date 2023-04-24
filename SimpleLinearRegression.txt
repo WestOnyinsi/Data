@@ -1,0 +1,62 @@
+import matplotlib.pyplot as plt
+%matplotlib inline 
+import pandas as pd
+nyc=pd.read_csv('/content/ave_hi_nyc_jan_1895-2018.csv')
+nyc.head()
+nyc.tail(7)
+nyc.sample(10)
+nyc.describe()
+nyc.columns=['Date','Temperature','Anomaly']
+nyc.head()
+nyc.Date=nyc.Date.floordiv(100)
+nyc.Date
+nyc.head()
+from sklearn.model_selection import train_test_split #splitting the data into training and testing
+nyc.Date.values.shape #get dimension
+X_train, X_test, y_train, y_test=train_test_split(nyc.Date.values.reshape(-1,1), nyc.Temperature.values, random_state=11)
+X_train.shape
+X_test.shape
+from sklearn.linear_model import LinearRegression #training the model
+linear_regression=LinearRegression()
+linear_regression
+linear_regression.fit(X=X_train, y=y_train)
+linear_regression.coef_
+linear_regression.intercept_
+#write the equation and estimate for 1895, 2000  Temperature=0.01939167*Date + -0.30779820252656265
+Temperature=((0.01939167*1895)+-0.30779820252656265)
+Temperature
+Temperature=((0.01939167*2000)+-0.30779820252656265)
+Temperature
+nyc
+#Testing the model
+predicted = linear_regression.predict(X_test)
+expected = y_test
+for p,e in zip(predicted[::],expected[::]):
+  print(f'Predicted: {p:.2f}, Expected: {e:.2f}')
+for p,e in zip(predicted[::],expected[::]):
+  print(f'Predicted: {p:.2f}, Expected: {e:.2f},Error: {e-p:.2f}')
+#Mean Absolute Error(MEA)
+from sklearn.metrics import mean_absolute_error
+print("MAE", mean_absolute_error(expected, predicted))
+#Root Mean Squared Error (RMSE) 
+from sklearn.metrics import mean_squared_error
+import numpy as np
+print(f'RMSE',np.log(np.sqrt(mean_squared_error(expected, predicted))))
+#R Squared
+from sklearn.metrics import r2_score
+r2=r2_score(expected, predicted)
+r2 #-ve means independent value doesnt affect dependent value
+#predict future model
+predict=(lambda x: linear_regression.coef_ *x +linear_regression.intercept_)
+predict(1895)
+predict(2022)
+#visualizing the dataset with a regression line
+import seaborn as sns
+axes=sns.scatterplot(data=nyc,x='Date',y='Temperature', hue='Temperature',palette='winter',legend= False)
+axes.set_ylim(10,70)
+x=np.array([min(nyc.Date.values),max(nyc.Date.values)])
+y=predict(x)
+line=plt.plot(x,y)
+
+x
+y
